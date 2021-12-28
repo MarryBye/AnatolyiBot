@@ -8,25 +8,40 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 prefix = '>'
+kostil = {}
 
 @client.event
 async def on_ready():
+    
     print('Я гей')
 
 @client.event
 async def on_message(msg):
   
   # Vars
+  
+  if kostil == {}:
 
+    # Add embeds here
+    helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+    
+    # Add commands here
+    await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, [msg, helpEmb])
+    await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, [msg])
+    
+    # Do not touch!!!
+    for cmd in fnc.cmds:
+      helpEmb.add_field(name=cmd, value=fnc.cmds[cmd][0], inline=False)
+    
+    kostil[1] = 1 # жесточайший костыль в истории человечества т.к. я не хочу
+                       # чтобы каждый раз команды делались, а переменная не работает 
+                       # или у меня мозг оффнулся кто хочет исправляйте мне лень
+  
   user = msg.author
   channel = msg.channel
   messageIsPrivate = (str(channel.type) == 'private')
   guild = msg.guild
   content = msg.content
-  
-  # Embed forms
-  
-  helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
   
   # Not commands
   
@@ -42,16 +57,11 @@ async def on_message(msg):
     
   # Commands
   
-  helpEmb.add_field(name='ping', value='Проверить бота на жизнь.', inline=False)
-  if prefix + 'ping' in content:
-    await fnc.cmd_ping(msg)
-    return
-  
-  # COMMAND HELP MUST BE LAST!!!
-  helpEmb.add_field(name='help', value='Помощь', inline=False)
-  if prefix + 'help' in content:
-    await fnc.cmd_help(msg, helpEmb)
-    return
+  for cmd in fnc.cmds:
+    command = prefix + cmd
+    if command == content[0:len(command)]:
+        await fnc.cmds[cmd][1](*fnc.cmds[cmd][2])
+        return
   
   # Error no command
   await msg.reply('Такой команды не существует!')
@@ -65,4 +75,4 @@ async def on_member_join(member):
 async def on_member_remove(member):
     pass
 
-client.run('')
+client.run('OTI1MzMxNDg3MDUyNjg5NDM5.YcrkGg.1j5FyVutCfbp5gRzYirzHi9_fhU')

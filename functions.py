@@ -4,6 +4,12 @@ import asyncio
 
 from datetime import datetime
 
+cmds = {}
+
+async def createCommand(cmd, desc, func, *args):
+    cmds[cmd] = [desc, func, *args]
+    return
+
 async def addToLogFile(text, name):
   with open('chat_logs_' + str(name) + '.txt', 'a+') as writer:
     textToLog = '[' + datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + '] ' + text
@@ -14,8 +20,9 @@ async def addToLogFile(text, name):
     writer.write(textToLog)
     print(textToLog)
     
-async def cmd_ping(msg):
-  await msg.reply('Pong!')
   
-async def cmd_help(msg, emb):
-  await msg.channel.send(embed=emb)
+async def cmd_help(m, emb):
+  await m.reply(embed=emb)
+
+async def cmd_ping(m):
+  await m.reply('Pong!')
