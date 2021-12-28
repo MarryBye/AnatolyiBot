@@ -24,7 +24,7 @@ async def on_message(msg):
     return
 
   if messageIsPrivate and content != '':
-    await addToLogFile("[PRIVATE] {0}: {1}".format(user.name, content), 'private')
+    await fnc.addToLogFile("[PRIVATE] {0}: {1}".format(user.name, content), 'private')
     return
 
   await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content))
