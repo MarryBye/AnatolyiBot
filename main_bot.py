@@ -17,25 +17,21 @@ async def on_ready():
 
 @client.event
 async def on_message(msg):
-  
-  # Vars
-  
-  if kostil == {}:
 
-    # Add embeds here
-    helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+  # Add embeds here
+  helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
     
-    # Add commands here
-    await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, [msg, helpEmb])
-    await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, [msg])
+  # Add commands here
+  await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, [msg, helpEmb])
+  await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, [msg])
+  await fnc.createCommand('clear', 'Очистить последние сообщения в чате.', fnc.cmd_clear, [msg])
+  await fnc.createCommand('setAdminRole', 'Установить роль администратора.', fnc.cmd_setAdminRole, [msg])
+  await fnc.createCommand('setNewsChannel', 'Установить новостной канал.', fnc.cmd_setNewsChannel, [msg])
+  await fnc.createCommand('setWelcomeChannel', 'Установить канал входов.', fnc.cmd_setWelcomeChannel, [msg])
     
     # Do not touch!!!
-    for cmd in fnc.cmds:
-      helpEmb.add_field(name=cmd, value=fnc.cmds[cmd][0], inline=False)
-    
-    kostil[1] = 1 # жесточайший костыль в истории человечества т.к. я не хочу
-                       # чтобы каждый раз команды делались, а переменная не работает 
-                       # или у меня мозг оффнулся кто хочет исправляйте мне лень
+  for cmd in fnc.cmds:
+    helpEmb.add_field(name=cmd, value=fnc.cmds[cmd][0], inline=False)
   
   user = msg.author
   channel = msg.channel
@@ -60,8 +56,8 @@ async def on_message(msg):
   for cmd in fnc.cmds:
     command = prefix + cmd
     if command == content[0:len(command)]:
-        await fnc.cmds[cmd][1](*fnc.cmds[cmd][2])
-        return
+      await fnc.cmds[cmd][1](*fnc.cmds[cmd][2])
+      return
   
   # Error no command
   await msg.reply('Такой команды не существует!')
