@@ -75,4 +75,4 @@ async def on_member_join(member):
 async def on_member_remove(member):
     pass
 
-client.run('OTI1MzMxNDg3MDUyNjg5NDM5.YcrkGg.1j5FyVutCfbp5gRzYirzHi9_fhU')
+client.run('')
