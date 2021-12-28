@@ -27,7 +27,7 @@ async def on_message(msg):
     await fnc.addToLogFile("[PRIVATE] {0}: {1}".format(user.name, content), 'private')
     return
 
-  await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content))
+  await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
 
 @client.event
 async def on_member_join(member):
