@@ -13,3 +13,9 @@ async def addToLogFile(text, name):
       writer.write('\n')
     writer.write(textToLog)
     print(textToLog)
+    
+async def cmd_ping(msg):
+  await msg.reply('Pong!')
+  
+async def cmd_help(msg, emb):
+  await msg.channel.send(embed=emb)

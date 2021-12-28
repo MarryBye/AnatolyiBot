@@ -7,12 +7,16 @@ import functions as fnc
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
+prefix = '>'
+
 @client.event
 async def on_ready():
     print('Я гей')
 
 @client.event
 async def on_message(msg):
+  
+  # Vars
 
   user = msg.author
   channel = msg.channel
@@ -20,15 +24,39 @@ async def on_message(msg):
   guild = msg.guild
   content = msg.content
   
+  # Embed forms
+  
+  helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+  
+  # Not commands
+  
   if msg.author.bot:
     return
 
   if messageIsPrivate and content != '':
-    await fnc.addToLogFile("[PRIVATE] {0}: {1}".format(user.name, content), 'private')
+    await fnc.addToLogFile('[PRIVATE] {0}: {1}'.format(user.name, content), 'private')
     return
 
-  await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
-
+  if content[0] != '>':
+    await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
+    
+  # Commands
+  
+  helpEmb.add_field(name='ping', value='Проверить бота на жизнь.', inline=False)
+  if prefix + 'ping' in content:
+    await fnc.cmd_ping(msg)
+    return
+  
+  # COMMAND HELP MUST BE LAST!!!
+  helpEmb.add_field(name='help', value='Помощь', inline=False)
+  if prefix + 'help' in content:
+    await fnc.cmd_help(msg, helpEmb)
+    return
+  
+  # Error no command
+  await msg.reply('Такой команды не существует!')
+  return
+    
 @client.event
 async def on_member_join(member):
     pass
