@@ -27,6 +27,8 @@ async def on_guild_join(guild):
     await fnc.save(path + '/settings_adminRole.txt', -1)
     await fnc.save(path + '/settings_newsChannel.txt', -1)
     await fnc.save(path + '/settings_welcomeChannel.txt', -1)
+    await fnc.save(path + '/settings_newsRole.txt', -1)
+    await fnc.savePickle(path + '/settings_rolesOnStart.pkl', [''])
   except:
     pass
 
@@ -35,16 +37,27 @@ async def on_message(msg):
 
   # Add embeds here
   helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+  newsEmb = discord.Embed(description='*{0}*'.format(msg.content), color=0xFF5733)
+  newsEmbCMD = discord.Embed(description='*{0}*'.format(msg.content[len(prefix + 'news '):]), color=0xFF5733)
+  memeEmb = discord.Embed(title='Мем', color=0xFF5733)
     
   # Add commands here
   await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, False, [msg, helpEmb])
+  await fnc.createCommand('onls', 'Подписаться на рассылку.', fnc.cmd_onls, False, [msg])
+  await fnc.createCommand('offls', 'Отписаться от рассылки.', fnc.cmd_offls, False, [msg])
   await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, False, [msg])
+  await fnc.createCommand('roll', 'Получить случайное число.', fnc.cmd_roll, False, [msg])
+  await fnc.createCommand('tof', 'Получить случайный ответ на вопрос.', fnc.cmd_tof, False, [msg])
+  await fnc.createCommand('meme', 'Получить смешной мем.', fnc.cmd_meme, False, [msg, memeEmb])
   await fnc.createCommand('clear', 'Очистить последние сообщения в чате.', fnc.cmd_clear, True, [msg])
+  await fnc.createCommand('news', 'Отправить новость с рассылкой.', fnc.cmd_news, True, [msg, newsEmbCMD])
   await fnc.createCommand('setAdminRole', 'Установить роль администратора.', fnc.cmd_setAdminRole, True, [msg])
   await fnc.createCommand('setNewsChannel', 'Установить новостной канал.', fnc.cmd_setNewsChannel, True, [msg])
   await fnc.createCommand('setWelcomeChannel', 'Установить канал входов.', fnc.cmd_setWelcomeChannel, True, [msg])
-    
-    # Do not touch!!!
+  await fnc.createCommand('setNewsRole', 'Установить роль для рассылки новостей.', fnc.cmd_setNewsRole, True, [msg])
+  await fnc.createCommand('setRolesOnStart', 'Установить стартовые роли.', fnc.cmd_setRolesOnStart, True, [msg])
+  
+  # Do not touch!!!
   for cmd in fnc.cmds:
     helpEmb.add_field(name=cmd, value=fnc.cmds[cmd][0], inline=False)
   
@@ -64,26 +77,34 @@ async def on_message(msg):
   adminRole = guild.get_role(adminRoleID)
   
   newsChannelID = await fnc.getNewsChannel(msg)
-  newsChannel = guild.get_role(newsChannelID)
+  newsChannel = guild.get_channel(newsChannelID)
   
   welcomeChannelID = await fnc.getWelcomeChannel(msg)
-  welcomeChannel = guild.get_role(welcomeChannelID)
+  welcomeChannel = guild.get_channel(welcomeChannelID)
+  
+  newsRoleID = await fnc.getNewsRole(msg)
+  newsRole = guild.get_role(newsRoleID)
+  
+  #for role in await fnc.getRolesOnStart(msg):
+    #print(await fnc.getNumbers(role))
   
   await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
-  
+
   if msg.author.bot:
     return
   
-  if content[0] != '>':
+  if content[0] != prefix:
     if channel.id == newsChannelID:
-      await msg.reply('News')
+      newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
+      await newsChannel.send(embed = newsEmb)
+      await msg.delete()
       return
     
   # Commands
   
   for cmd in fnc.cmds:
     command = prefix + cmd
-    if command == content[0:len(command)]:
+    if command.lower() == content[0:len(command)].lower():
       if fnc.cmds[cmd][2]:
         if adminRole in user.roles or user.id == guild.owner.id:
           await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
