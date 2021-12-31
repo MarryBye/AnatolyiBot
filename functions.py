@@ -37,55 +37,91 @@ async def getNumbers(txt):
     if w.isnumeric():
       id = id + w
   return id
-
-async def save(fname, arg):
-  fl = open(fname, 'w')
-  fl.write(str(arg))
-  fl.close()
   
-async def load(fname):
-  fl = open(fname, 'r')
-  return int(fl.read())
-  
-async def savePickle(fname, arg):
-  fl = open(fname, 'wb')
+async def savePickle(guildID, arg):
+  fl = open('data/{0}/settings_{0}.pkl'.format(guildID), 'wb')
   pickle.dump(arg, fl)
 
-async def loadPickle(fname):
-  fl = open(fname, 'rb')
+async def loadPickle(guildID):
+  fl = open('data/{0}/settings_{0}.pkl'.format(guildID), 'rb')
   content = pickle.load(fl)
   fl.close()
   return content
 
-async def getAdminRole(m):
-  guild = m.guild
-  path = 'data/' + str(guild.id)
-  content = await load(path + '/settings_adminRole.txt')
-  return content
+async def cmd_setAdminRole(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['adminRole'] = arg
 
-async def getNewsChannel(m):
-  guild = m.guild
-  path = 'data/' + str(guild.id)
-  content = await load(path + '/settings_newsChannel.txt')
-  return content
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.delete()
+  
+async def cmd_setNewsChannel(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['newsChannel'] = arg
 
-async def getWelcomeChannel(m):
-  guild = m.guild
-  path = 'data/' + str(guild.id)
-  content = await load(path + '/settings_welcomeChannel.txt')
-  return content
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.delete()
+  
+async def cmd_setWelcomeChannel(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['welcomeChannel'] = arg
 
-async def getNewsRole(m):
-  guild = m.guild
-  path = 'data/' + str(guild.id)
-  content = await load(path + '/settings_newsRole.txt')
-  return content
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.delete()
+  
+async def cmd_setNewsRole(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['newsRole'] = arg
 
-async def getRolesOnStart(m):
-  guild = m.guild
-  path = 'data/' + str(guild.id)
-  content = await loadPickle(path + '/settings_rolesOnStart.pkl')
-  return content
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.delete()
+  
+async def cmd_setRolesOnStart(m):
+  
+  arg = m.content[len('_setrolesonstart '):].split(' ')
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['rolesOnStart'] = arg
+
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.delete()
+
+async def getAdminRole(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['adminRole'])
+
+async def getNewsChannel(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['newsChannel'])
+
+async def getWelcomeChannel(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['welcomeChannel'])
+
+async def getNewsRole(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['newsRole'])
+
+async def getRolesOnStart(guildID):
+  arg = await loadPickle(guildID)
+  return arg['rolesOnStart']
   
 async def cmd_help(m, emb):
   await m.reply(embed=emb)
@@ -97,76 +133,12 @@ async def cmd_clear(m):
   arg = m.content[len('_clear '):]
   await m.channel.purge(limit=int(arg))
   await m.channel.send('**{0}** очистил **{1}** последних сообщений в канале!'.format(m.author.name, arg))
-
-async def cmd_setAdminRole(m):
-  guild = m.guild
-  arg = await getNumbers(m.content)
-  adminRole = guild.get_role(int(arg))
-  path = 'data/' + str(guild.id)
-  try:
-    os.mkdir(path)
-  except:
-    pass
-  await save(path + '/settings_adminRole.txt', arg)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(adminRole.name))
-  await m.delete()
-  
-async def cmd_setNewsChannel(m):
-  guild = m.guild
-  arg = await getNumbers(m.content)
-  newsChannel = guild.get_channel(int(arg))
-  path = 'data/' + str(guild.id)
-  try:
-    os.mkdir(path)
-  except:
-    pass
-  await save(path + '/settings_newsChannel.txt', arg)
-  await m.channel.send('Установил {0} как **новостной канал**!'.format(newsChannel.name))
-  await m.delete()
-  
-async def cmd_setWelcomeChannel(m):
-  guild = m.guild
-  arg = await getNumbers(m.content)
-  welcomeChannel = guild.get_channel(int(arg))
-  path = 'data/' + str(guild.id)
-  try:
-    os.mkdir(path)
-  except:
-    pass
-  await save(path + '/settings_welcomeChannel.txt', arg)
-  await m.channel.send('Установил {0} как **приветственный канал**!'.format(welcomeChannel.name))
-  await m.delete()
-  
-async def cmd_setNewsRole(m):
-  guild = m.guild
-  arg = await getNumbers(m.content)
-  newsRole = guild.get_role(int(arg))
-  path = 'data/' + str(guild.id)
-  try:
-    os.mkdir(path)
-  except:
-    pass
-  await save(path + '/settings_newsRole.txt', arg)
-  await m.channel.send('Установил {0} как **роль для рассылки**!'.format(newsRole.name))
-  await m.delete()
-  
-async def cmd_setRolesOnStart(m):
-  guild = m.guild
-  arg = m.content[len('_setrolesonstart '):].split(' ')
-  path = 'data/' + str(guild.id)
-  try:
-    os.mkdir(path)
-  except:
-    pass
-  await savePickle(path + '/settings_rolesOnStart.pkl', arg)
-  await m.channel.send('Установил указанные роли как **стартовые**!')
-  await m.delete()
   
 async def cmd_news(m, emb):
   guild = m.guild
   arg = m.content[len('_news '):]
-  newsChannel = guild.get_channel(await getNewsChannel(m))
-  newsRole = guild.get_role(await getNewsRole(m))
+  newsChannel = guild.get_channel(await getNewsChannel(guild.id))
+  newsRole = guild.get_role(await getNewsRole(guild.id))
   for member in guild.members:
     if newsRole in member.roles:
       emb.set_author(name=m.author.name, url=m.author.avatar_url, icon_url=m.author.avatar_url)
@@ -176,7 +148,7 @@ async def cmd_news(m, emb):
       
 async def cmd_onls(m):
   guild = m.guild
-  newsRole = guild.get_role(await getNewsRole(m))
+  newsRole = guild.get_role(await getNewsRole(guild.id))
   try:
     await m.author.add_roles(newsRole)
   except:
@@ -185,7 +157,7 @@ async def cmd_onls(m):
       
 async def cmd_offls(m):
   guild = m.guild
-  newsRole = guild.get_role(await getNewsRole(m))
+  newsRole = guild.get_role(await getNewsRole(guild.id))
   try:
     await m.author.remove_roles(newsRole)
   except:

@@ -13,24 +13,30 @@ kostil = {}
 
 @client.event
 async def on_ready():
+  
   try:
     os.mkdir('data')
   except:
     pass
+  
   print('Я гей')
   
 @client.event
 async def on_guild_join(guild):
-  path = 'data/' + str(guild.id)
+  
+  settingsStartTable = {}
+  settingsStartTable['adminRole'] = -1
+  settingsStartTable['newsRole'] = -1
+  settingsStartTable['welcomeChannel'] = -1
+  settingsStartTable['newsChannel'] = -1
+  settingsStartTable['rolesOnStart'] = ['']
+  
   try:
-    os.mkdir(path)
-    await fnc.save(path + '/settings_adminRole.txt', -1)
-    await fnc.save(path + '/settings_newsChannel.txt', -1)
-    await fnc.save(path + '/settings_welcomeChannel.txt', -1)
-    await fnc.save(path + '/settings_newsRole.txt', -1)
-    await fnc.savePickle(path + '/settings_rolesOnStart.pkl', [''])
+    os.mkdir('data/{0}'.format(guild.id))
+    await fnc.savePickle(guild.id, settingsStartTable)
   except:
     pass
+  
 
 @client.event
 async def on_message(msg):
@@ -73,20 +79,17 @@ async def on_message(msg):
     await fnc.addToLogFile('[PRIVATE] {0}: {1}'.format(user.name, content), 'PRIVATE_LOGS')
     return
   
-  adminRoleID = await fnc.getAdminRole(msg)
+  adminRoleID = await fnc.getAdminRole(guild.id)
   adminRole = guild.get_role(adminRoleID)
   
-  newsChannelID = await fnc.getNewsChannel(msg)
+  newsChannelID = await fnc.getNewsChannel(guild.id)
   newsChannel = guild.get_channel(newsChannelID)
   
-  welcomeChannelID = await fnc.getWelcomeChannel(msg)
+  welcomeChannelID = await fnc.getWelcomeChannel(guild.id)
   welcomeChannel = guild.get_channel(welcomeChannelID)
   
-  newsRoleID = await fnc.getNewsRole(msg)
+  newsRoleID = await fnc.getNewsRole(guild.id)
   newsRole = guild.get_role(newsRoleID)
-  
-  #for role in await fnc.getRolesOnStart(msg):
-    #print(await fnc.getNumbers(role))
   
   await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
 
@@ -95,10 +98,11 @@ async def on_message(msg):
   
   if content[0] != prefix:
     if channel.id == newsChannelID:
-      newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
-      await newsChannel.send(embed = newsEmb)
-      await msg.delete()
-      return
+      if adminRole in user.roles or user.id == guild.owner.id:
+        newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
+        await newsChannel.send(embed = newsEmb)
+        await msg.delete()
+        return
     
   # Commands
   
@@ -127,4 +131,4 @@ async def on_member_join(member):
 async def on_member_remove(member):
     pass
 
-client.run('')
+client.run('OTI1MzMxNDg3MDUyNjg5NDM5.YcrkGg.Ev5JaG95ZbqLClVmNAzrhGPPY5U')
