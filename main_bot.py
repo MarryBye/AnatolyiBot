@@ -102,7 +102,7 @@ async def on_message(msg):
         newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
         await newsChannel.send(embed = newsEmb)
         await msg.delete()
-        return
+    return
     
   # Commands
   
@@ -131,4 +131,4 @@ async def on_member_join(member):
 async def on_member_remove(member):
     pass
 
-client.run('')
+client.run('OTI1MzMxNDg3MDUyNjg5NDM5.YcrkGg.lda6O3o0tEB_ieVxg2XwEWOpMjI')
