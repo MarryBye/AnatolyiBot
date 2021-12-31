@@ -131,4 +131,4 @@ async def on_member_join(member):
 async def on_member_remove(member):
     pass
 
-client.run('OTI1MzMxNDg3MDUyNjg5NDM5.YcrkGg.Ev5JaG95ZbqLClVmNAzrhGPPY5U')
+client.run('')
