@@ -161,7 +161,7 @@ async def on_member_remove(member):
 
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
-  logsEmb = discord.Embed(title='Участник вышел', color=0x2ecc71)
+  logsEmb = discord.Embed(title='Участник вышел', color=0xe74c3c)
   logsEmb.add_field(name='Участник: ', value=member.name + '#' + member.discriminator, inline=False)
   logsEmb.add_field(name='Аккаунт создан: : ', value=member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
   logsEmb.add_field(name='Последний вход: : ', value=member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
@@ -355,4 +355,4 @@ async def on_guild_role_delete(role):
 async def on_guild_role_update(bef, aft):
   pass
 
-client.run('')
+client.run(fnc.readToken())

@@ -10,6 +10,10 @@ from datetime import datetime
 
 cmds = {}
 
+def readToken():
+  with open('token', 'r') as fl:
+    return fl.read()
+
 async def createCommand(cmd, desc, func, forAdm, *args):
     cmds[cmd] = [desc, func, forAdm, *args]
     return
