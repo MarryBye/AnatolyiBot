@@ -28,6 +28,7 @@ async def on_guild_join(guild):
   settingsStartTable['newsRole'] = -1
   settingsStartTable['welcomeChannel'] = -1
   settingsStartTable['newsChannel'] = -1
+  settingsStartTable['logsChannel'] = -1
   settingsStartTable['rolesOnStart'] = ['']
   
   try:
@@ -36,15 +37,15 @@ async def on_guild_join(guild):
   except:
     pass
   
+helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+memeEmb = discord.Embed(title='Мем', color=0xFF5733)
 
 @client.event
 async def on_message(msg):
 
   # Add embeds here
-  helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
   newsEmb = discord.Embed(description='*{0}*'.format(msg.content), color=0xFF5733)
   newsEmbCMD = discord.Embed(description='*{0}*'.format(msg.content[len(prefix + 'news '):]), color=0xFF5733)
-  memeEmb = discord.Embed(title='Мем', color=0xFF5733)
     
   # Add commands here
   await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, False, [msg, helpEmb])
@@ -59,6 +60,7 @@ async def on_message(msg):
   await fnc.createCommand('setAdminRole', 'Установить роль администратора.', fnc.cmd_setAdminRole, True, [msg])
   await fnc.createCommand('setNewsChannel', 'Установить новостной канал.', fnc.cmd_setNewsChannel, True, [msg])
   await fnc.createCommand('setWelcomeChannel', 'Установить канал входов.', fnc.cmd_setWelcomeChannel, True, [msg])
+  await fnc.createCommand('setLogsChannel', 'Установить канал для логов.', fnc.cmd_setLogsChannel, True, [msg])
   await fnc.createCommand('setNewsRole', 'Установить роль для рассылки новостей.', fnc.cmd_setNewsRole, True, [msg])
   await fnc.createCommand('setRolesOnStart', 'Установить стартовые роли.', fnc.cmd_setRolesOnStart, True, [msg])
   
@@ -83,9 +85,6 @@ async def on_message(msg):
   
   newsChannelID = await fnc.getNewsChannel(guild.id)
   newsChannel = guild.get_channel(newsChannelID)
-  
-  newsRoleID = await fnc.getNewsRole(guild.id)
-  newsRole = guild.get_role(newsRoleID)
   
   await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
   
@@ -150,5 +149,132 @@ async def on_member_remove(member):
   welcomeChannel = guild.get_channel(welcomeChannelID)
   
   await welcomeChannel.send('**{0}** вышел с сервера. Вход был: **{1}**.'.format(member.name, member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), member.mention))
+
+@client.event
+async def on_message_delete(msg):
+  
+  guild = msg.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Удалено сообщение', color=0xe74c3c)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
+  logsEmb.add_field(name='Содержание: ', value=msg.content, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
+  
+
+@client.event
+async def on_message_edit(bef, aft):
+  
+  guild = bef.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Отредактировано сообщение', color=0xf1c40f)
+  logsEmb.add_field(name='Автор: ', value=bef.author.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=bef.channel.mention, inline=True)
+  logsEmb.add_field(name='Содержание до: ', value=bef.content, inline=False)
+  logsEmb.add_field(name='Содержание после: ', value=aft.content, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_reaction_add(react, member):
+  
+  guild = react.message.guild
+  msg = react.message
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Добавлена реакция', color=0x2ecc71)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
+  logsEmb.add_field(name='Добавил: ', value=member.mention, inline=True)
+  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=True)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_reaction_remove(react, member):
+  
+  guild = react.message.guild
+  msg = react.message
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Удалена реакция', color=0xe74c3c)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
+  logsEmb.add_field(name='Удалил: ', value=member.mention, inline=True)
+  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=True)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_reaction_clear(msg, react):
+  
+  guild = msg.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  arg = ''
+  
+  for r in react:
+    arg = arg + ' ' + str(r)
+  
+  logsEmb = discord.Embed(title='Очищены реакции', color=0xe74c3c)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
+  logsEmb.add_field(name='Реакции: ', value=arg, inline=True)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_guild_channel_delete(channel):
+  
+  guild = channel.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Удален канал', color=0xe74c3c)
+  logsEmb.add_field(name='Канал: ', value=channel.name, inline=True)
+  logsEmb.add_field(name='Категория: ', value=channel.category, inline=True)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_guild_channel_create(channel):
+  
+  guild = channel.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Создан канал', color=0x2ecc71)
+  logsEmb.add_field(name='Канал: ', value=channel.mention, inline=True)
+  logsEmb.add_field(name='Категория: ', value=channel.category, inline=True)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_guild_channel_update(bef, aft):
+  pass
+
+@client.event
+async def on_webhooks_update(channel):
+  pass
+
+@client.event
+async def on_member_update(bef, aft):
+  pass
+
+@client.event
+async def on_guild_role_create(role):
+  pass
+
+@client.event
+async def on_guild_role_delete(role):
+  pass
+
+@client.event
+async def on_guild_role_update(bef, aft):
+  pass
 
 client.run('')
