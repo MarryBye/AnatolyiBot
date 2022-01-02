@@ -92,9 +92,12 @@ async def on_message(msg):
   
   if content[0] != prefix:
     if channel.id == newsChannelID:
-      if adminRole in user.roles or user.id == guild.owner.id:
+      if adminRole in user.roles or user.id == guild.owner.id or user.guild_permissions.administrator:
         newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
-        await newsChannel.send(embed = newsEmb)
+        try:
+          await newsChannel.send(embed = newsEmb)
+        except:
+          pass
         await msg.delete()
     return
     
@@ -139,7 +142,10 @@ async def on_member_join(member):
   logsEmb.add_field(name='Аккаунт создан: : ', value=member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
   logsEmb.add_field(name='Бот: ', value=member.bot, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
   
   if member.bot:
     return
@@ -166,7 +172,10 @@ async def on_member_remove(member):
   logsEmb.add_field(name='Последний вход: : ', value=member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
   logsEmb.add_field(name='Бот: ', value=member.bot, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
   
 @client.event
 async def on_member_update(bef, aft):
@@ -192,37 +201,58 @@ async def on_member_update(bef, aft):
       argAft = argAft + str(role)
       continue
     argAft = argAft + ' <@&' + str(role.id) + '>'
+    
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_update):
+    userEditor = str(log.user)
   
   logsEmb = discord.Embed(title='Изменения участника', color=0xf1c40f)
-  logsEmb.add_field(name='Участник: ', value=bef.mention, inline=True)
+  logsEmb.add_field(name='Участник: ', value=bef.mention, inline=False)
+  logsEmb.add_field(name='Изменил: ', value=userEditor, inline=False)
   logsEmb.add_field(name='Имя до: ', value=bef.display_name, inline=False)
   logsEmb.add_field(name='Роли до: ', value=argBef, inline=False)
   logsEmb.add_field(name='Имя после: ', value=aft.display_name, inline=False)
   logsEmb.add_field(name='Роли после: ', value=argAft, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_member_ban(guild, user):
   
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
-  logsEmb = discord.Embed(title='Бан участника', color=0xe74c3c)
-  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=True)
-
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban):
+    userBanner = str(log.user)
+    reason = str(log.reason)
   
-  await logsChannel.send(embed=logsEmb)
+  logsEmb = discord.Embed(title='Бан участника', color=0xe74c3c)
+  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=False)
+  logsEmb.add_field(name='Забанил: ', value=userBanner, inline=False)
+  logsEmb.add_field(name='Причина: ', value=reason, inline=False)
+  
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_member_unban(guild, user):
   
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
-  logsEmb = discord.Embed(title='Разбан участника', color=0x2ecc71)
-  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=True)
-
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.unban):
+    userUnbanner = str(log.user)
   
-  await logsChannel.send(embed=logsEmb)
+  logsEmb = discord.Embed(title='Разбан участника', color=0x2ecc71)
+  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=False)
+  logsEmb.add_field(name='Разбанил: ', value=userUnbanner, inline=False)
+
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_message_delete(msg):
@@ -230,12 +260,19 @@ async def on_message_delete(msg):
   guild = msg.guild
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.message_delete):
+    userDeleter = str(log.user)
+  
   logsEmb = discord.Embed(title='Удалено сообщение', color=0xe74c3c)
-  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
-  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=False)
+  logsEmb.add_field(name='Удалил: ', value=userDeleter, inline=False)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=False)
   logsEmb.add_field(name='Содержание: ', value=msg.content, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
   
 
 @client.event
@@ -245,12 +282,15 @@ async def on_message_edit(bef, aft):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Отредактировано сообщение', color=0xf1c40f)
-  logsEmb.add_field(name='Автор: ', value=bef.author.mention, inline=True)
-  logsEmb.add_field(name='Канал: ', value=bef.channel.mention, inline=True)
+  logsEmb.add_field(name='Автор: ', value=bef.author.mention, inline=False)
+  logsEmb.add_field(name='Канал: ', value=bef.channel.mention, inline=False)
   logsEmb.add_field(name='Содержание до: ', value=bef.content, inline=False)
   logsEmb.add_field(name='Содержание после: ', value=aft.content, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_reaction_add(react, member):
@@ -260,13 +300,16 @@ async def on_reaction_add(react, member):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Добавлена реакция', color=0x2ecc71)
-  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
-  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
-  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
-  logsEmb.add_field(name='Добавил: ', value=member.mention, inline=True)
-  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=True)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=False)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=False)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=False)
+  logsEmb.add_field(name='Добавил: ', value=member.mention, inline=False)
+  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_reaction_remove(react, member):
@@ -276,13 +319,16 @@ async def on_reaction_remove(react, member):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Удалена реакция', color=0xe74c3c)
-  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
-  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
-  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
-  logsEmb.add_field(name='Удалил: ', value=member.mention, inline=True)
-  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=True)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=False)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=False)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=False)
+  logsEmb.add_field(name='Удалил: ', value=member.mention, inline=False)
+  logsEmb.add_field(name='Реакция: ', value=react.emoji, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_reaction_clear(msg, react):
@@ -296,12 +342,15 @@ async def on_reaction_clear(msg, react):
     arg = arg + ' ' + str(r)
   
   logsEmb = discord.Embed(title='Очищены реакции', color=0xe74c3c)
-  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=True)
-  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=True)
-  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=True)
-  logsEmb.add_field(name='Реакции: ', value=arg, inline=True)
+  logsEmb.add_field(name='Автор: ', value=msg.author.mention, inline=False)
+  logsEmb.add_field(name='Канал: ', value=msg.channel.mention, inline=False)
+  logsEmb.add_field(name='Сообщение: ', value=msg.jump_url, inline=False)
+  logsEmb.add_field(name='Реакции: ', value=arg, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_channel_delete(channel):
@@ -310,8 +359,8 @@ async def on_guild_channel_delete(channel):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Удален канал', color=0xe74c3c)
-  logsEmb.add_field(name='Канал: ', value=channel.name, inline=True)
-  logsEmb.add_field(name='Категория: ', value=channel.category, inline=True)
+  logsEmb.add_field(name='Канал: ', value=channel.name, inline=False)
+  logsEmb.add_field(name='Категория: ', value=channel.category, inline=False)
   
   await logsChannel.send(embed=logsEmb)
 
@@ -322,10 +371,13 @@ async def on_guild_channel_create(channel):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Создан канал', color=0x2ecc71)
-  logsEmb.add_field(name='Канал: ', value=channel.mention, inline=True)
-  logsEmb.add_field(name='Категория: ', value=channel.category, inline=True)
+  logsEmb.add_field(name='Канал: ', value=channel.mention, inline=False)
+  logsEmb.add_field(name='Категория: ', value=channel.category, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_channel_update(bef, aft):
@@ -334,13 +386,16 @@ async def on_guild_channel_update(bef, aft):
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
   logsEmb = discord.Embed(title='Отредактирован канал', color=0xf1c40f)
-  logsEmb.add_field(name='Канал: ', value=bef.mention, inline=True)
+  logsEmb.add_field(name='Канал: ', value=bef.mention, inline=False)
   logsEmb.add_field(name='Название до: ', value=bef.name, inline=False)
   logsEmb.add_field(name='Категория до: ', value=bef.category, inline=False)
   logsEmb.add_field(name='Название после: ', value=aft.name, inline=False)
   logsEmb.add_field(name='Категория после: ', value=aft.category, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_role_create(role):
