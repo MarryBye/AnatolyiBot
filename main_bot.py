@@ -85,14 +85,11 @@ async def on_message(msg):
   newsChannelID = await fnc.getNewsChannel(guild.id)
   newsChannel = guild.get_channel(newsChannelID)
   
-  welcomeChannelID = await fnc.getWelcomeChannel(guild.id)
-  welcomeChannel = guild.get_channel(welcomeChannelID)
-  
   newsRoleID = await fnc.getNewsRole(guild.id)
   newsRole = guild.get_role(newsRoleID)
   
   await fnc.addToLogFile('[{0}] {1}: {2}'.format(channel.name, user.name, content), guild.id)
-
+  
   if msg.author.bot:
     return
   
@@ -111,13 +108,19 @@ async def on_message(msg):
     if command.lower() == content[0:len(command)].lower():
       if fnc.cmds[cmd][2]:
         if adminRole in user.roles or user.id == guild.owner.id:
-          await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+          try:
+            await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+          except:
+            await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
           return
         else:
           await msg.reply('У вас нет доступа к этой команде!')
           return
       else:
-        await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+        try:
+          await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+        except:
+          await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
         return
     
   await msg.reply('Такой команды не существует!')
@@ -125,10 +128,28 @@ async def on_message(msg):
     
 @client.event
 async def on_member_join(member):
-    pass
+  
+  guild = member.guild
+  welcomeChannelID = await fnc.getWelcomeChannel(guild.id)
+  welcomeChannel = guild.get_channel(welcomeChannelID)
+  
+  await welcomeChannel.send('**{0}** зашел на сервер. Аккаунт создан: **{1}**. ({2})'.format(member.name, member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), member.mention))
 
+  if member.bot:
+    return
+  
+  rolesOnStart = await fnc.getRolesOnStart(guild.id)
+  for role in rolesOnStart:
+    r = guild.get_role(int(role))
+    await member.add_roles(r)
+    
 @client.event
 async def on_member_remove(member):
-    pass
+  
+  guild = member.guild
+  welcomeChannelID = await fnc.getWelcomeChannel(guild.id)
+  welcomeChannel = guild.get_channel(welcomeChannelID)
+  
+  await welcomeChannel.send('**{0}** вышел с сервера. Вход был: **{1}**.'.format(member.name, member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), member.mention))
 
 client.run('')
