@@ -90,7 +90,7 @@ async def on_message(msg):
   if msg.author.bot:
     return
   
-  if content[0] != prefix:
+  if content != '' and content[0] != prefix:
     if channel.id == newsChannelID:
       if adminRole in user.roles or user.id == guild.owner.id or user.guild_permissions.administrator:
         newsEmb.set_author(name=user.name, url=user.avatar_url, icon_url=user.avatar_url)
@@ -366,7 +366,10 @@ async def on_guild_channel_delete(channel):
   logsEmb.add_field(name='Категория: ', value=channel.category, inline=False)
   logsEmb.add_field(name='Удалил: ', value=userDeleter, inline=False)
   
-  await logsChannel.send(embed=logsEmb)
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_channel_create(channel):
