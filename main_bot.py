@@ -36,14 +36,13 @@ async def on_guild_join(guild):
     await fnc.savePickle(guild.id, settingsStartTable)
   except:
     pass
-  
-helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
-memeEmb = discord.Embed(title='Мем', color=0xFF5733)
 
 @client.event
 async def on_message(msg):
 
   # Add embeds here
+  helpEmb = discord.Embed(title='Помощь (префикс - ">")', description='Ниже приведены все команды этого бота', color=0xFF5733)
+  memeEmb = discord.Embed(title='Мем', color=0xFF5733)
   newsEmb = discord.Embed(description='*{0}*'.format(msg.content), color=0xFF5733)
   newsEmbCMD = discord.Embed(description='*{0}*'.format(msg.content[len(prefix + 'news '):]), color=0xFF5733)
     
