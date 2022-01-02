@@ -105,7 +105,7 @@ async def on_message(msg):
     command = prefix + cmd
     if command.lower() == content[0:len(command)].lower():
       if fnc.cmds[cmd][2]:
-        if adminRole in user.roles or user.id == guild.owner.id:
+        if adminRole in user.roles or user.id == guild.owner.id or user.guild_permissions.administrator:
           try:
             await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
           except:
