@@ -162,15 +162,17 @@ async def cmd_clear(m):
   
 async def cmd_news(m, emb):
   guild = m.guild
-  arg = m.content[len('_news '):]
   newsChannel = guild.get_channel(await getNewsChannel(guild.id))
   newsRole = guild.get_role(await getNewsRole(guild.id))
   emb.set_author(name=m.author.name, url=m.author.avatar_url, icon_url=m.author.avatar_url)
   await newsChannel.send(embed = emb)
   for member in guild.members:
     if newsRole in member.roles:
-      await member.send(embed = emb)
-      await m.delete()
+      try:
+        await member.send(embed = emb)
+      except:
+        pass
+  await m.delete()
       
 async def cmd_onls(m):
   guild = m.guild
