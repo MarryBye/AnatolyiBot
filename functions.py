@@ -81,6 +81,17 @@ async def cmd_setWelcomeChannel(m):
   await m.channel.send('Установил <#{0}> как **канал приветствий**!'.format(arg))
   await m.delete()
   
+async def cmd_setLogsChannel(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['logsChannel'] = arg
+
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил <#{0}> как **канал логов**!'.format(arg))
+  await m.delete()
+  
 async def cmd_setNewsRole(m):
   
   arg = await getNumbers(m.content)
@@ -121,6 +132,10 @@ async def getNewsChannel(guildID):
 async def getWelcomeChannel(guildID):
   arg = await loadPickle(guildID)
   return int(arg['welcomeChannel'])
+
+async def getLogsChannel(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['logsChannel'])
 
 async def getNewsRole(guildID):
   arg = await loadPickle(guildID)
