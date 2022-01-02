@@ -358,9 +358,13 @@ async def on_guild_channel_delete(channel):
   guild = channel.guild
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete):
+    userDeleter = str(log.user)
+  
   logsEmb = discord.Embed(title='Удален канал', color=0xe74c3c)
   logsEmb.add_field(name='Канал: ', value=channel.name, inline=False)
   logsEmb.add_field(name='Категория: ', value=channel.category, inline=False)
+  logsEmb.add_field(name='Удалил: ', value=userDeleter, inline=False)
   
   await logsChannel.send(embed=logsEmb)
 
@@ -370,9 +374,13 @@ async def on_guild_channel_create(channel):
   guild = channel.guild
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_create):
+    userCreator = str(log.user)
+  
   logsEmb = discord.Embed(title='Создан канал', color=0x2ecc71)
   logsEmb.add_field(name='Канал: ', value=channel.mention, inline=False)
   logsEmb.add_field(name='Категория: ', value=channel.category, inline=False)
+  logsEmb.add_field(name='Создал: ', value=userCreator, inline=False)
   
   try:
     await logsChannel.send(embed=logsEmb)
@@ -385,12 +393,16 @@ async def on_guild_channel_update(bef, aft):
   guild = bef.guild
   logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
   
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_update):
+    userEditor = str(log.user)
+  
   logsEmb = discord.Embed(title='Отредактирован канал', color=0xf1c40f)
   logsEmb.add_field(name='Канал: ', value=bef.mention, inline=False)
   logsEmb.add_field(name='Название до: ', value=bef.name, inline=False)
   logsEmb.add_field(name='Категория до: ', value=bef.category, inline=False)
   logsEmb.add_field(name='Название после: ', value=aft.name, inline=False)
   logsEmb.add_field(name='Категория после: ', value=aft.category, inline=False)
+  logsEmb.add_field(name='Отредактировал: ', value=userEditor, inline=False)
   
   try:
     await logsChannel.send(embed=logsEmb)
@@ -399,14 +411,63 @@ async def on_guild_channel_update(bef, aft):
 
 @client.event
 async def on_guild_role_create(role):
-  pass
+  
+  guild = role.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.role_create):
+    userCreator = str(log.user)
+    
+  logsEmb = discord.Embed(title='Создана роль', color=0x2ecc71)
+  logsEmb.add_field(name='Роль: ', value=role.mention, inline=False)
+  logsEmb.add_field(name='Создал: ', value=userCreator, inline=False)
+  
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_role_delete(role):
-  pass
+  
+  guild = role.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.role_delete):
+    userDeleter = str(log.user)
+    
+  logsEmb = discord.Embed(title='Удалена роль', color=0xe74c3c)
+  logsEmb.add_field(name='Роль: ', value=role.name, inline=False)
+  logsEmb.add_field(name='Удалил: ', value=userDeleter, inline=False)
+  
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 @client.event
 async def on_guild_role_update(bef, aft):
-  pass
+  
+  if bef.permissions == aft.permissions and bef.name == aft.name:
+    return
+  
+  guild = bef.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.role_update):
+    userEditor = str(log.user)
+    
+  logsEmb = discord.Embed(title='Отредактирована роль', color=0xf1c40f)
+  logsEmb.add_field(name='Роль: ', value=bef.mention, inline=False)
+  logsEmb.add_field(name='Название до: ', value=bef.name, inline=False)
+  logsEmb.add_field(name='Права до: ', value=bef.permissions.value, inline=False)
+  logsEmb.add_field(name='Имя после: ', value=aft.name, inline=False)
+  logsEmb.add_field(name='Права после: ', value=aft.permissions.value, inline=False)
+  logsEmb.add_field(name='Отредактировал: ', value=userEditor, inline=False)
+  
+  try:
+    await logsChannel.send(embed=logsEmb)
+  except:
+    pass
 
 client.run(fnc.readToken())
