@@ -56,7 +56,7 @@ async def cmd_setAdminRole(m):
   oldTable['adminRole'] = arg
 
   await savePickle(m.guild.id, oldTable)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.channel.send('Установил <@&{0}> как **роль администратора**!'.format(arg))
   await m.delete()
   
 async def cmd_setNewsChannel(m):
@@ -67,7 +67,7 @@ async def cmd_setNewsChannel(m):
   oldTable['newsChannel'] = arg
 
   await savePickle(m.guild.id, oldTable)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.channel.send('Установил <#{0}> как **новостной канал**!'.format(arg))
   await m.delete()
   
 async def cmd_setWelcomeChannel(m):
@@ -78,7 +78,7 @@ async def cmd_setWelcomeChannel(m):
   oldTable['welcomeChannel'] = arg
 
   await savePickle(m.guild.id, oldTable)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.channel.send('Установил <#{0}> как **канал приветствий**!'.format(arg))
   await m.delete()
   
 async def cmd_setNewsRole(m):
@@ -89,18 +89,25 @@ async def cmd_setNewsRole(m):
   oldTable['newsRole'] = arg
 
   await savePickle(m.guild.id, oldTable)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.channel.send('Установил <@&{0}> как **роль для рассылки**!'.format(arg))
   await m.delete()
   
 async def cmd_setRolesOnStart(m):
   
-  arg = m.content[len('_setrolesonstart '):].split(' ')
+  argNotFormatted = m.content[len('_setrolesonstart '):]
+  arg = ''
+  
+  for w in argNotFormatted:
+    if w.isnumeric() or w == ' ':
+      arg = arg + w
+      
+  arg = arg.split(' ')
   
   oldTable = await loadPickle(m.guild.id)
   oldTable['rolesOnStart'] = arg
 
   await savePickle(m.guild.id, oldTable)
-  await m.channel.send('Установил {0} как **роль администратора**!'.format(arg))
+  await m.channel.send('Установил {0} как **стартовые роли**!'.format(argNotFormatted))
   await m.delete()
 
 async def getAdminRole(guildID):
