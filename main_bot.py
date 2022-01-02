@@ -133,6 +133,15 @@ async def on_member_join(member):
   
   await welcomeChannel.send('**{0}** зашел на сервер. Аккаунт создан: **{1}**. ({2})'.format(member.name, member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), member.mention))
 
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Участник вошел', color=0x2ecc71)
+  logsEmb.add_field(name='Участник: ', value=member.mention, inline=False)
+  logsEmb.add_field(name='Аккаунт создан: : ', value=member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
+  logsEmb.add_field(name='Бот: ', value=member.bot, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
+  
   if member.bot:
     return
   
@@ -149,6 +158,72 @@ async def on_member_remove(member):
   welcomeChannel = guild.get_channel(welcomeChannelID)
   
   await welcomeChannel.send('**{0}** вышел с сервера. Вход был: **{1}**.'.format(member.name, member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), member.mention))
+
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Участник вышел', color=0x2ecc71)
+  logsEmb.add_field(name='Участник: ', value=member.name + '#' + member.discriminator, inline=False)
+  logsEmb.add_field(name='Аккаунт создан: : ', value=member.created_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
+  logsEmb.add_field(name='Последний вход: : ', value=member.joined_at.strftime("[%d/%m/%Y - %H:%M:%S]"), inline=False)
+  logsEmb.add_field(name='Бот: ', value=member.bot, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
+  
+@client.event
+async def on_member_update(bef, aft):
+  
+  if bef.roles == aft.roles and bef.display_name == aft.display_name:
+    return
+  
+  guild = bef.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  argBef = ''
+  
+  for role in bef.roles:
+    if role.name == '@everyone':
+      argBef = argBef + str(role)
+      continue
+    argBef = argBef + ' <@&' + str(role.id) + '>'
+    
+  argAft = ''
+  
+  for role in aft.roles:
+    if role.name == '@everyone':
+      argAft = argAft + str(role)
+      continue
+    argAft = argAft + ' <@&' + str(role.id) + '>'
+  
+  logsEmb = discord.Embed(title='Изменения участника', color=0xf1c40f)
+  logsEmb.add_field(name='Участник: ', value=bef.mention, inline=True)
+  logsEmb.add_field(name='Имя до: ', value=bef.display_name, inline=False)
+  logsEmb.add_field(name='Роли до: ', value=argBef, inline=False)
+  logsEmb.add_field(name='Имя после: ', value=aft.display_name, inline=False)
+  logsEmb.add_field(name='Роли после: ', value=argAft, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_member_ban(guild, user):
+  
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Бан участника', color=0xe74c3c)
+  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=True)
+
+  
+  await logsChannel.send(embed=logsEmb)
+
+@client.event
+async def on_member_unban(guild, user):
+  
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Разбан участника', color=0x2ecc71)
+  logsEmb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=True)
+
+  
+  await logsChannel.send(embed=logsEmb)
 
 @client.event
 async def on_message_delete(msg):
@@ -255,15 +330,18 @@ async def on_guild_channel_create(channel):
 
 @client.event
 async def on_guild_channel_update(bef, aft):
-  pass
-
-@client.event
-async def on_webhooks_update(channel):
-  pass
-
-@client.event
-async def on_member_update(bef, aft):
-  pass
+  
+  guild = bef.guild
+  logsChannel = guild.get_channel(await fnc.getLogsChannel(guild.id))
+  
+  logsEmb = discord.Embed(title='Отредактирован канал', color=0xf1c40f)
+  logsEmb.add_field(name='Канал: ', value=bef.mention, inline=True)
+  logsEmb.add_field(name='Название до: ', value=bef.name, inline=False)
+  logsEmb.add_field(name='Категория до: ', value=bef.category, inline=False)
+  logsEmb.add_field(name='Название после: ', value=aft.name, inline=False)
+  logsEmb.add_field(name='Категория после: ', value=aft.category, inline=False)
+  
+  await logsChannel.send(embed=logsEmb)
 
 @client.event
 async def on_guild_role_create(role):
