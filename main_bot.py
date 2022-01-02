@@ -9,7 +9,6 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 prefix = '>'
-kostil = {}
 
 @client.event
 async def on_ready():
