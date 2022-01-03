@@ -29,6 +29,7 @@ async def on_guild_join(guild):
   settingsStartTable['welcomeChannel'] = -1
   settingsStartTable['newsChannel'] = -1
   settingsStartTable['logsChannel'] = -1
+  settingsStartTable['reportChannel'] = -1
   settingsStartTable['rolesOnStart'] = ['']
   
   try:
@@ -45,27 +46,53 @@ async def on_message(msg):
   memeEmb = discord.Embed(title='Мем', color=0xFF5733)
   newsEmb = discord.Embed(description='*{0}*'.format(msg.content), color=0xFF5733)
   newsEmbCMD = discord.Embed(description='*{0}*'.format(msg.content[len(prefix + 'news '):]), color=0xFF5733)
+  banEmb = discord.Embed(title='Информация про бан', color=0xFF5733)
+  kickEmb = discord.Embed(title='Информация про кик', color=0xFF5733)
+  clearEmb = discord.Embed(title='Информация про чистку', color=0xFF5733)
+  reportEmb = discord.Embed(title='Жалоба', color=0xFF5733)
     
   # Add commands here
-  await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, False, [msg, helpEmb])
-  await fnc.createCommand('onls', 'Подписаться на рассылку.', fnc.cmd_onls, False, [msg])
-  await fnc.createCommand('offls', 'Отписаться от рассылки.', fnc.cmd_offls, False, [msg])
-  await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, False, [msg])
-  await fnc.createCommand('roll', 'Получить случайное число.', fnc.cmd_roll, False, [msg])
-  await fnc.createCommand('tof', 'Получить случайный ответ на вопрос.', fnc.cmd_tof, False, [msg])
-  await fnc.createCommand('meme', 'Получить смешной мем.', fnc.cmd_meme, False, [msg, memeEmb])
-  await fnc.createCommand('clear', 'Очистить последние сообщения в чате.', fnc.cmd_clear, True, [msg])
-  await fnc.createCommand('news', 'Отправить новость с рассылкой.', fnc.cmd_news, True, [msg, newsEmbCMD])
-  await fnc.createCommand('setAdminRole', 'Установить роль администратора.', fnc.cmd_setAdminRole, True, [msg])
-  await fnc.createCommand('setNewsChannel', 'Установить новостной канал.', fnc.cmd_setNewsChannel, True, [msg])
-  await fnc.createCommand('setWelcomeChannel', 'Установить канал входов.', fnc.cmd_setWelcomeChannel, True, [msg])
-  await fnc.createCommand('setLogsChannel', 'Установить канал для логов.', fnc.cmd_setLogsChannel, True, [msg])
-  await fnc.createCommand('setNewsRole', 'Установить роль для рассылки новостей.', fnc.cmd_setNewsRole, True, [msg])
-  await fnc.createCommand('setRolesOnStart', 'Установить стартовые роли.', fnc.cmd_setRolesOnStart, True, [msg])
+  
+  # User commands
+  
+  await fnc.createCommand('help', 'Получить справку.', fnc.cmd_help, False, 'Пользовательские', [msg, helpEmb])
+  await fnc.createCommand('report', 'Отправить жалобу на человека.', fnc.cmd_report, False, 'Пользовательские', [msg, reportEmb])
+  await fnc.createCommand('onls', 'Подписаться на рассылку.', fnc.cmd_onls, False, 'Пользовательские', [msg])
+  await fnc.createCommand('offls', 'Отписаться от рассылки.', fnc.cmd_offls, False, 'Пользовательские', [msg])
+  await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, False, 'Пользовательские', [msg])
+  
+  # Fun commands
+  await fnc.createCommand('roll', 'Получить случайное число.', fnc.cmd_roll, False, 'Развлечение', [msg])
+  await fnc.createCommand('tof', 'Получить случайный ответ на вопрос.', fnc.cmd_tof, False, 'Развлечение', [msg])
+  await fnc.createCommand('meme', 'Получить смешной мем.', fnc.cmd_meme, False, 'Развлечение', [msg, memeEmb])
+  
+  # Admin commands
+  await fnc.createCommand('clear', 'Очистить последние сообщения в чате.', fnc.cmd_clear, True, 'Администраторские', [msg, clearEmb])
+  await fnc.createCommand('news', 'Отправить новость с рассылкой.', fnc.cmd_news, True, 'Администраторские', [msg, newsEmbCMD])
+  await fnc.createCommand('ban', 'Забанить участника.', fnc.cmd_ban, True, 'Администраторские', [msg, banEmb])
+  await fnc.createCommand('kick', 'Кикнуть участника.', fnc.cmd_kick, True, 'Администраторские', [msg, kickEmb])
+  
+  # Settings commands
+  await fnc.createCommand('setAdminRole', 'Установить роль администратора.', fnc.cmd_setAdminRole, True, 'Настройки', [msg])
+  await fnc.createCommand('setNewsRole', 'Установить роль для рассылки новостей.', fnc.cmd_setNewsRole, True, 'Настройки', [msg])
+  await fnc.createCommand('setRolesOnStart', 'Установить стартовые роли.', fnc.cmd_setRolesOnStart, True, 'Настройки', [msg])
+  await fnc.createCommand('setNewsChannel', 'Установить новостной канал.', fnc.cmd_setNewsChannel, True, 'Настройки', [msg])
+  await fnc.createCommand('setWelcomeChannel', 'Установить канал входов.', fnc.cmd_setWelcomeChannel, True, 'Настройки', [msg])
+  await fnc.createCommand('setLogsChannel', 'Установить канал для логов.', fnc.cmd_setLogsChannel, True, 'Настройки', [msg])
+  await fnc.createCommand('setReportChannel', 'Установить канал для репортов.', fnc.cmd_setReportChannel, True, 'Настройки', [msg])
   
   # Do not touch!!!
+  cmd_sorted = {}
+
   for cmd in fnc.cmds:
-    helpEmb.add_field(name=cmd, value=fnc.cmds[cmd][0], inline=False)
+    try:
+      cmd_sorted[fnc.cmds[cmd][3]].insert(0, '`` ' + prefix + cmd + ' ``')
+    except:
+      cmd_sorted[fnc.cmds[cmd][3]] = []
+      cmd_sorted[fnc.cmds[cmd][3]].insert(0, '`` ' + prefix + cmd + ' ``')
+      
+  for cat in cmd_sorted:
+    helpEmb.add_field(name=cat, value=' '.join(cmd_sorted[cat]), inline=False)
   
   user = msg.author
   channel = msg.channel
@@ -105,11 +132,11 @@ async def on_message(msg):
   
   for cmd in fnc.cmds:
     command = prefix + cmd
-    if command.lower() == content[0:len(command)].lower():
+    if command.lower() == content.split(' ')[0]:
       if fnc.cmds[cmd][2]:
         if adminRole in user.roles or user.id == guild.owner.id or user.guild_permissions.administrator:
           try:
-            await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+            await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
           except:
             await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
           return
@@ -118,7 +145,7 @@ async def on_message(msg):
           return
       else:
         try:
-          await fnc.cmds[cmd][1](*fnc.cmds[cmd][3])
+          await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
         except:
           await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
         return

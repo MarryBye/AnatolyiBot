@@ -14,8 +14,8 @@ def readToken():
   with open('token', 'r') as fl:
     return fl.read()
 
-async def createCommand(cmd, desc, func, forAdm, *args):
-    cmds[cmd] = [desc, func, forAdm, *args]
+async def createCommand(cmd, desc, func, forAdm, t, *args):
+    cmds[cmd] = [desc, func, forAdm, t, *args]
     return
 
 async def addToLogFile(text, name):
@@ -107,6 +107,17 @@ async def cmd_setNewsRole(m):
   await m.channel.send('Установил <@&{0}> как **роль для рассылки**!'.format(arg))
   await m.delete()
   
+async def cmd_setReportChannel(m):
+  
+  arg = await getNumbers(m.content)
+  
+  oldTable = await loadPickle(m.guild.id)
+  oldTable['reportChannel'] = arg
+
+  await savePickle(m.guild.id, oldTable)
+  await m.channel.send('Установил <#{0}> как **канал для репортов**!'.format(arg))
+  await m.delete()
+  
 async def cmd_setRolesOnStart(m):
   
   argNotFormatted = m.content[len('_setrolesonstart '):]
@@ -148,6 +159,10 @@ async def getNewsRole(guildID):
 async def getRolesOnStart(guildID):
   arg = await loadPickle(guildID)
   return arg['rolesOnStart']
+
+async def getReportChannel(guildID):
+  arg = await loadPickle(guildID)
+  return int(arg['reportChannel'])
   
 async def cmd_help(m, emb):
   await m.reply(embed=emb)
@@ -155,10 +170,15 @@ async def cmd_help(m, emb):
 async def cmd_ping(m):
   await m.reply('Pong!')
   
-async def cmd_clear(m):
-  arg = m.content[len('_clear '):]
-  await m.channel.purge(limit=int(arg))
-  await m.channel.send('**{0}** очистил **{1}** последних сообщений в канале!'.format(m.author.name, arg))
+async def cmd_clear(m, emb):
+  args = m.content.split(' ')
+  messageCount = args[1]
+  
+  emb.add_field(name='Участник: ', value=m.author.mention, inline=False)
+  emb.add_field(name='Очистил: ', value=messageCount + ' собщений!', inline=False)
+  
+  await m.channel.purge(limit=int(messageCount))
+  await m.channel.send(embed=emb)
   
 async def cmd_news(m, emb):
   guild = m.guild
@@ -204,3 +224,63 @@ async def cmd_meme(m, emb):
         res = await r.json()
         emb.set_image(url=res['data']['children'][random.randint(0, 25)]['data']['url'])
         await m.channel.send(embed=emb)
+        
+async def cmd_report(m, emb):
+  
+  guild = m.guild
+  reportChannel = guild.get_channel(await getReportChannel(guild.id))
+  
+  args = m.content.split(' ')
+  userID = await getNumbers(args[1])
+  user = guild.get_member(int(userID))
+  reason = '** **'
+  
+  for word in args[2:]:
+    reason = reason + word + ' '
+  
+  emb.add_field(name='Жалоба на: ', value=user.mention, inline=False)
+  emb.add_field(name='Пожаловался: ', value=m.author.mention, inline=False)
+  emb.add_field(name='Причина: ', value=reason, inline=False)
+  
+  await m.channel.send('{0}, ваша жалоба отправлена и будет рассмотрена администраторами!'.format(m.author.mention))
+  await reportChannel.send(embed=emb)
+  await m.delete()
+        
+async def cmd_ban(m, emb):
+  
+  guild = m.guild
+  args = m.content.split(' ')
+  userID = await getNumbers(args[1])
+  user = guild.get_member(int(userID))
+  reason = '** **'
+  
+  for word in args[2:]:
+    reason = reason + word + ' '
+    
+  emb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=False)
+  emb.add_field(name='Забанил: ', value=m.author.mention, inline=False)
+  emb.add_field(name='Причина: ', value=reason, inline=False)
+  
+  await m.channel.send(embed=emb)
+  await guild.ban(user, reason=reason, delete_message_days=0)
+  await m.delete()
+  
+async def cmd_kick(m, emb):
+  
+  guild = m.guild
+  args = m.content.split(' ')
+  userID = await getNumbers(args[1])
+  user = guild.get_member(int(userID))
+  reason = '** **'
+  
+  for word in args[2:]:
+    reason = reason + word + ' '
+    
+  emb.add_field(name='Участник: ', value=user.name + '#' + user.discriminator, inline=False)
+  emb.add_field(name='Кикнул: ', value=m.author.mention, inline=False)
+  emb.add_field(name='Причина: ', value=reason, inline=False)
+  
+  await guild.kick(user, reason=reason)
+  await m.channel.send(embed=emb)
+  await m.delete()
+  
