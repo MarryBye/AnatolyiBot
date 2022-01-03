@@ -27,11 +27,11 @@ async def on_ready():
   for guild in client.guilds:
     print('Загрузка | Сервер «{0}»...'.format(guild.name))
     await fnc.repairFilesForGuild(guild)
-
-  
   
 @client.event
 async def on_guild_join(guild):
+
+  print('Зашел в сервер «{0}»'.format(guild.name))
   
   print('Загрузка | Сервер «{0}»...'.format(guild.name))
   await fnc.repairFilesForGuild(guild)
