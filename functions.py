@@ -52,6 +52,28 @@ async def loadPickle(guildID, fname):
   fl.close()
   return content
 
+async def repairFilesForGuild(guild):
+  
+  settingsStartTable = {}
+  settingsStartTable['adminRole'] = -1
+  settingsStartTable['newsRole'] = -1
+  settingsStartTable['welcomeChannel'] = -1
+  settingsStartTable['newsChannel'] = -1
+  settingsStartTable['logsChannel'] = -1
+  settingsStartTable['reportChannel'] = -1
+  settingsStartTable['rolesOnStart'] = ['']
+  
+  membersStartTable = {}
+
+  try:
+    os.mkdir('data/{0}'.format(guild.id))
+    await savePickle(guild.id, 'guildSettings', settingsStartTable)
+    await savePickle(guild.id, 'membersStats', membersStartTable)
+    print('Восстановил файлы для сервера «{0}»'.format(guild.name))
+  except:
+    print('Файлы не нуждаются в восстановлении!')
+    pass
+
 async def cmd_setAdminRole(m):
   
   arg = await getNumbers(m.content)
@@ -198,7 +220,7 @@ async def cmd_info(m, emb):
   
   for i in range(100)[::5]:
     if percentsHas > i:
-      percentGraph = percentGraph + '/'
+      percentGraph = percentGraph + '#'
     else:
       percentGraph = percentGraph + ' .'
   

@@ -12,34 +12,29 @@ prefix = '>'
 
 @client.event
 async def on_ready():
+
+  print('Бот готов к использованию.')
+
+  print('Проверка данных...')
   
   try:
     os.mkdir('data')
+    print('Восстановил папку data!')
   except:
+    print('Папка data не нуждается в восстановлении!')
     pass
   
-  print('Я гей')
+  for guild in client.guilds:
+    print('Загрузка | Сервер «{0}»...'.format(guild.name))
+    await fnc.repairFilesForGuild(guild)
+
+  
   
 @client.event
 async def on_guild_join(guild):
   
-  settingsStartTable = {}
-  settingsStartTable['adminRole'] = -1
-  settingsStartTable['newsRole'] = -1
-  settingsStartTable['welcomeChannel'] = -1
-  settingsStartTable['newsChannel'] = -1
-  settingsStartTable['logsChannel'] = -1
-  settingsStartTable['reportChannel'] = -1
-  settingsStartTable['rolesOnStart'] = ['']
-  
-  membersStartTable = {}
-  
-  try:
-    os.mkdir('data/{0}'.format(guild.id))
-    await fnc.savePickle(guild.id, 'guildSettings', settingsStartTable)
-    await fnc.savePickle(guild.id, 'membersStats', membersStartTable)
-  except:
-    pass
+  print('Загрузка | Сервер «{0}»...'.format(guild.name))
+  await fnc.repairFilesForGuild(guild)
 
 @client.event
 async def on_message(msg):
