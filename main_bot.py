@@ -32,9 +32,12 @@ async def on_guild_join(guild):
   settingsStartTable['reportChannel'] = -1
   settingsStartTable['rolesOnStart'] = ['']
   
+  membersStartTable = {}
+  
   try:
     os.mkdir('data/{0}'.format(guild.id))
-    await fnc.savePickle(guild.id, settingsStartTable)
+    await fnc.savePickle(guild.id, 'guildSettings', settingsStartTable)
+    await fnc.savePickle(guild.id, 'membersStats', membersStartTable)
   except:
     pass
 
@@ -50,6 +53,7 @@ async def on_message(msg):
   kickEmb = discord.Embed(title='Информация про кик', color=0xFF5733)
   clearEmb = discord.Embed(title='Информация про чистку', color=0xFF5733)
   reportEmb = discord.Embed(title='Жалоба', color=0xFF5733)
+  infoEmb = discord.Embed(title='Информация', color=0xFF5733)
     
   # Add commands here
   
@@ -60,6 +64,7 @@ async def on_message(msg):
   await fnc.createCommand('onls', 'Подписаться на рассылку.', fnc.cmd_onls, False, 'Пользовательские', [msg])
   await fnc.createCommand('offls', 'Отписаться от рассылки.', fnc.cmd_offls, False, 'Пользовательские', [msg])
   await fnc.createCommand('ping', 'Проверить жив ли бот.', fnc.cmd_ping, False, 'Пользовательские', [msg])
+  await fnc.createCommand('info', 'Информация про вас.', fnc.cmd_info, False, 'Пользовательские', [msg, infoEmb])
   
   # Fun commands
   await fnc.createCommand('roll', 'Получить случайное число.', fnc.cmd_roll, False, 'Развлечение', [msg])
@@ -99,6 +104,18 @@ async def on_message(msg):
   messageIsPrivate = str(channel.type) == 'private'
   guild = msg.guild
   content = msg.content
+  
+  userInfo = await fnc.loadPickle(guild.id, 'membersStats')
+  
+  if str(user.id) in userInfo:
+    userInfo[str(user.id)]['msgs'] += 1
+    await fnc.savePickle(guild.id, 'membersStats', userInfo)
+  else:
+    userInfo[str(user.id)] = {}
+    userInfo[str(user.id)]['lvl'] = 0
+    userInfo[str(user.id)]['exp'] = 0
+    userInfo[str(user.id)]['msgs'] = 0
+    await fnc.savePickle(guild.id, 'membersStats', userInfo)
   
   # Not commands
   

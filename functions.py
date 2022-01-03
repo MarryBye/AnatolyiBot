@@ -42,12 +42,12 @@ async def getNumbers(txt):
       id = id + w
   return id
   
-async def savePickle(guildID, arg):
-  fl = open('data/{0}/settings_{0}.pkl'.format(guildID), 'wb')
+async def savePickle(guildID, fname, arg):
+  fl = open('data/{0}/{1}.pkl'.format(guildID, fname), 'wb')
   pickle.dump(arg, fl)
 
-async def loadPickle(guildID):
-  fl = open('data/{0}/settings_{0}.pkl'.format(guildID), 'rb')
+async def loadPickle(guildID, fname):
+  fl = open('data/{0}/{1}.pkl'.format(guildID, fname), 'rb')
   content = pickle.load(fl)
   fl.close()
   return content
@@ -56,10 +56,10 @@ async def cmd_setAdminRole(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['adminRole'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <@&{0}> как **роль администратора**!'.format(arg))
   await m.delete()
   
@@ -67,10 +67,10 @@ async def cmd_setNewsChannel(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['newsChannel'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <#{0}> как **новостной канал**!'.format(arg))
   await m.delete()
   
@@ -78,10 +78,10 @@ async def cmd_setWelcomeChannel(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['welcomeChannel'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <#{0}> как **канал приветствий**!'.format(arg))
   await m.delete()
   
@@ -89,10 +89,10 @@ async def cmd_setLogsChannel(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['logsChannel'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <#{0}> как **канал логов**!'.format(arg))
   await m.delete()
   
@@ -100,10 +100,10 @@ async def cmd_setNewsRole(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['newsRole'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <@&{0}> как **роль для рассылки**!'.format(arg))
   await m.delete()
   
@@ -111,10 +111,10 @@ async def cmd_setReportChannel(m):
   
   arg = await getNumbers(m.content)
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['reportChannel'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил <#{0}> как **канал для репортов**!'.format(arg))
   await m.delete()
   
@@ -129,46 +129,71 @@ async def cmd_setRolesOnStart(m):
       
   arg = arg.split(' ')
   
-  oldTable = await loadPickle(m.guild.id)
+  oldTable = await loadPickle(m.guild.id, 'guildSettings')
   oldTable['rolesOnStart'] = arg
 
-  await savePickle(m.guild.id, oldTable)
+  await savePickle(m.guild.id, 'guildSettings', oldTable)
   await m.channel.send('Установил {0} как **стартовые роли**!'.format(argNotFormatted))
   await m.delete()
 
 async def getAdminRole(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['adminRole'])
 
 async def getNewsChannel(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['newsChannel'])
 
 async def getWelcomeChannel(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['welcomeChannel'])
 
 async def getLogsChannel(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['logsChannel'])
 
 async def getNewsRole(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['newsRole'])
 
 async def getRolesOnStart(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return arg['rolesOnStart']
 
 async def getReportChannel(guildID):
-  arg = await loadPickle(guildID)
+  arg = await loadPickle(guildID, 'guildSettings')
   return int(arg['reportChannel'])
+
+async def getMemberLevel(guildID, userID):
+  arg = await loadPickle(guildID, 'membersStats')
+  return arg[str(userID)]['lvl']
+
+async def getMemberExperience(guildID, userID):
+  arg = await loadPickle(guildID, 'membersStats')
+  return arg[str(userID)]['exp']
+
+async def getMemberMessages(guildID, userID):
+  arg = await loadPickle(guildID, 'membersStats')
+  return arg[str(userID)]['msgs']
   
 async def cmd_help(m, emb):
   await m.reply(embed=emb)
 
 async def cmd_ping(m):
   await m.reply('Pong!')
+  
+async def cmd_info(m, emb):
+  
+  msgs = await getMemberMessages(m.guild.id, m.author.id)
+  lvl = await getMemberLevel(m.guild.id, m.author.id)
+  exp = await getMemberExperience(m.guild.id, m.author.id)
+  
+  emb.add_field(name='Участник: ', value=m.author.mention, inline=False)
+  emb.add_field(name='Всего сообщений: ', value=str(msgs), inline=True)
+  emb.add_field(name='Уровень: ', value=lvl, inline=True)
+  emb.add_field(name='Опыт: ', value=exp, inline=True)
+  
+  await m.reply(embed=emb) 
   
 async def cmd_clear(m, emb):
   args = m.content.split(' ')
