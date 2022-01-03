@@ -200,7 +200,7 @@ async def cmd_info(m, emb):
     if percentsHas > i:
       percentGraph = percentGraph + '/'
     else:
-      percentGraph = percentGraph + '.'
+      percentGraph = percentGraph + ' .'
   
   emb.add_field(name='Участник: ', value=m.author.mention, inline=False)
   emb.add_field(name='Всего сообщений: ', value=str(msgs), inline=False)
