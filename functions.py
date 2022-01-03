@@ -172,6 +172,10 @@ async def getMemberExperience(guildID, userID):
   arg = await loadPickle(guildID, 'membersStats')
   return arg[str(userID)]['exp']
 
+async def getMemberExperienceToNextLvl(guildID, userID):
+  arg = await loadPickle(guildID, 'membersStats')
+  return arg[str(userID)]['expToNextLvl']
+
 async def getMemberMessages(guildID, userID):
   arg = await loadPickle(guildID, 'membersStats')
   return arg[str(userID)]['msgs']
@@ -187,11 +191,21 @@ async def cmd_info(m, emb):
   msgs = await getMemberMessages(m.guild.id, m.author.id)
   lvl = await getMemberLevel(m.guild.id, m.author.id)
   exp = await getMemberExperience(m.guild.id, m.author.id)
+  exptonextlvl = await getMemberExperienceToNextLvl(m.guild.id, m.author.id)
+  
+  percentsHas = 100 * exp / exptonextlvl
+  percentGraph = ''
+  
+  for i in range(100)[::5]:
+    if percentsHas > i:
+      percentGraph = percentGraph + '/'
+    else:
+      percentGraph = percentGraph + '.'
   
   emb.add_field(name='Участник: ', value=m.author.mention, inline=False)
-  emb.add_field(name='Всего сообщений: ', value=str(msgs), inline=True)
-  emb.add_field(name='Уровень: ', value=lvl, inline=True)
-  emb.add_field(name='Опыт: ', value=exp, inline=True)
+  emb.add_field(name='Всего сообщений: ', value=str(msgs), inline=False)
+  emb.add_field(name='Уровень: ', value=str(lvl), inline=False)
+  emb.add_field(name='Опыт: ', value='{0} / {1} EXP\n[{2}]'.format(exp, exptonextlvl, percentGraph), inline=False)
   
   await m.reply(embed=emb) 
   

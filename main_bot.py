@@ -109,11 +109,18 @@ async def on_message(msg):
   
   if str(user.id) in userInfo:
     userInfo[str(user.id)]['msgs'] += 1
+    userInfo[str(user.id)]['exp'] += round((0.1 + len(content) / 10), 3)
+    if userInfo[str(user.id)]['exp'] >= userInfo[str(user.id)]['expToNextLvl']:
+      userInfo[str(user.id)]['lvl'] += 1
+      userInfo[str(user.id)]['expToNextLvl'] = round(userInfo[str(user.id)]['expToNextLvl'] * 2.5, 3)
+      userInfo[str(user.id)]['exp'] = 0
+      await msg.channel.send('{0}, поздравляю с достижением {1} уровня!'.format(msg.author.mention, userInfo[str(user.id)]['lvl']))
     await fnc.savePickle(guild.id, 'membersStats', userInfo)
   else:
     userInfo[str(user.id)] = {}
     userInfo[str(user.id)]['lvl'] = 0
     userInfo[str(user.id)]['exp'] = 0
+    userInfo[str(user.id)]['expToNextLvl'] = 100
     userInfo[str(user.id)]['msgs'] = 0
     await fnc.savePickle(guild.id, 'membersStats', userInfo)
   
