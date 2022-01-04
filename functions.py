@@ -5,6 +5,7 @@ import os
 import random
 import aiohttp
 import pickle
+import youtube_dl
 
 from datetime import datetime
 
@@ -345,3 +346,81 @@ async def cmd_kick(m, emb):
   await m.channel.send(embed=emb)
   await m.delete()
   
+async def loadAndPlayMusic(v, u):
+  v.stop()
+  FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+  YDL_OPTIONS = {'format': 'bestaudio'}
+  with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+    info = ydl.extract_info(u, download=False)
+    u2 = info['formats'][0]['url']
+    source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
+    v.play(source)
+  
+async def cmd_join(m):
+  
+  if m.author.voice is None:
+    await m.reply('Вы не в голосовом канале!')
+    return
+  
+  await m.author.voice.channel.connect()
+  await m.reply('Вошел.')
+  
+async def cmd_exit(m, voices):
+  
+  if m.author.voice is None:
+    await m.reply('Вы не в голосовом канале!')
+    return
+  
+  for voice in voices:
+    if voice.channel in m.guild.voice_channels:
+      voice.stop()
+      await voice.disconnect()
+      
+  await m.reply('Вышел.')
+  
+async def cmd_play(m, voices):
+  
+  args = m.content.split(' ')
+  url = args[1]
+  voiceChannel = None
+    
+  if m.author.voice is None:
+    await m.reply('Вы не в голосовом канале!')
+    return
+  
+  try:
+    voiceChannel = await m.author.voice.channel.connect()
+  except:
+    pass
+
+  if voiceChannel is None:
+    for voice in voices:
+      if voice.channel in m.guild.voice_channels:
+        await m.guild.get_member(voice.user.id).move_to(m.author.voice.channel)
+        await loadAndPlayMusic(voice, url)
+  else:
+    await loadAndPlayMusic(voiceChannel, url)
+    
+  await m.reply('Проигрывание начато!')
+  
+async def cmd_pause(m, voices):
+  
+  if m.author.voice is None:
+    await m.reply('Вы не в голосовом канале!')
+    return
+  
+  for voice in voices:
+    if voice.channel in m.guild.voice_channels:
+      await m.reply('Проигрывание приостановлено!')
+      voice.pause()
+  
+async def cmd_resume(m, voices):
+  
+  if m.author.voice is None:
+    await m.reply('Вы не в голосовом канале!')
+    return
+  
+  for voice in voices:
+    if voice.channel in m.guild.voice_channels:
+      await m.reply('Проигрывание возобновлено!')
+      voice.resume()

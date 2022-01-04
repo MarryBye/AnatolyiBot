@@ -66,6 +66,13 @@ async def on_message(msg):
   await fnc.createCommand('tof', 'Получить случайный ответ на вопрос.', fnc.cmd_tof, False, 'Развлечение', [msg])
   await fnc.createCommand('meme', 'Получить смешной мем.', fnc.cmd_meme, False, 'Развлечение', [msg, memeEmb])
   
+  # Music commands
+  await fnc.createCommand('>', 'Зайти в голосовой канал.', fnc.cmd_join, False, 'Проигрыватель', [msg])
+  await fnc.createCommand('<', 'Выйти из голосового канала.', fnc.cmd_exit, False, 'Проигрыватель', [msg, client.voice_clients])
+  await fnc.createCommand('p', 'Начать проигрывание музыки.', fnc.cmd_play, False, 'Проигрыватель', [msg, client.voice_clients])
+  await fnc.createCommand('s', 'Остановить проигрывание музыки.', fnc.cmd_pause, False, 'Проигрыватель', [msg, client.voice_clients])
+  await fnc.createCommand('r', 'Возобновить проигрывание музыки.', fnc.cmd_resume, False, 'Проигрыватель', [msg, client.voice_clients])
+  
   # Admin commands
   await fnc.createCommand('clear', 'Очистить последние сообщения в чате.', fnc.cmd_clear, True, 'Администраторские', [msg, clearEmb])
   await fnc.createCommand('news', 'Отправить новость с рассылкой.', fnc.cmd_news, True, 'Администраторские', [msg, newsEmbCMD])
