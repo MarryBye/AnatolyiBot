@@ -354,12 +354,12 @@ async def loadAndPlayMusic(v, u):
     if u.startswith('https://www.youtube.com/watch'):
       info = ydl.extract_info(u, download=False)
       u2 = info['formats'][0]['url']
-      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
+      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg', **FFMPEG_OPTIONS)
       v.play(source)
     else:
       info = ydl.extract_info('ytsearch:{0}'.format(u), download=False)['entries'][0]
       u2 = info['formats'][0]['url']
-      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
+      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg', **FFMPEG_OPTIONS)
       v.play(source)
       
   
