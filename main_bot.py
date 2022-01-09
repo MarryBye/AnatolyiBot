@@ -1,6 +1,4 @@
 import discord
-from discord.ext import commands
-import asyncio
 import os
 
 import functions as fnc
@@ -127,6 +125,9 @@ async def on_message(msg):
     await fnc.savePickle(guild.id, 'membersStats', userInfo)
   
   # Not commands
+
+  if content == '':
+    return
   
   if messageIsPrivate:
     await fnc.addToLogFile('[PRIVATE] {0}: {1}'.format(user.name, content), 'PRIVATE_LOGS')
