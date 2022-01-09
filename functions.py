@@ -351,10 +351,17 @@ async def loadAndPlayMusic(v, u):
   FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
   YDL_OPTIONS = {'format': 'bestaudio'}
   with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-    info = ydl.extract_info(u, download=False)
-    u2 = info['formats'][0]['url']
-    source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
-    v.play(source)
+    if u.startswith('https://www.youtube.com/watch'):
+      info = ydl.extract_info(u, download=False)
+      u2 = info['formats'][0]['url']
+      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
+      v.play(source)
+    else:
+      info = ydl.extract_info('ytsearch:{0}'.format(u), download=False)['entries'][0]
+      u2 = info['formats'][0]['url']
+      source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg.exe', **FFMPEG_OPTIONS)
+      v.play(source)
+      
   
 async def cmd_join(m):
   
@@ -381,7 +388,14 @@ async def cmd_exit(m, voices):
 async def cmd_play(m, voices):
   
   args = m.content.split(' ')
-  url = args[1]
+  url = ''
+  
+  if args[1].startswith('https://www.youtube.com/watch'):
+    url = args[1]
+  else:
+    for w in args[1:]:
+      url += f' {w}'
+  
   voiceChannel = None
     
   if m.author.voice is None:
