@@ -7,7 +7,7 @@ import aiohttp
 import pickle
 import youtube_dl
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 cmds = {}
 
@@ -430,7 +430,7 @@ async def cmd_play(m, voices, emb):
   emb.add_field(name='Участник: ', value=author, inline=False)
   emb.add_field(name='Канал: ', value='[{0}]({1})'.format(videoTable['author'], videoTable['author_url']), inline=False)
   emb.add_field(name='Видео: ', value='[{0}]({1})'.format(videoTable['title'], videoTable['video_url']), inline=False)
-  emb.add_field(name='Длительность: ', value=datetime.timedelta(seconds=int(videoTable['time'])), inline=False)
+  emb.add_field(name='Длительность: ', value=str(timedelta(seconds=int(videoTable['time']))), inline=False)
     
   await m.channel.send(embed=emb)
   await m.delete()
