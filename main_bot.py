@@ -171,10 +171,10 @@ async def on_message(msg):
           await msg.reply('У вас нет доступа к этой команде!')
           return
       else:
-        #try:
-        await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
-        #except:
-          #await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
+        try:
+          await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
+        except:
+          await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
         return
     
   await msg.reply('Такой команды не существует!')
