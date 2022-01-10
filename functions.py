@@ -6,10 +6,14 @@ import random
 import aiohttp
 import pickle
 import youtube_dl
+import requests
+from bs4 import BeautifulSoup
 
 from datetime import datetime
 
 cmds = {}
+
+queue = {}
 
 def readToken():
   with open('token', 'r') as fl:
@@ -362,6 +366,15 @@ async def loadAndPlayMusic(v, u):
       source = await discord.FFmpegOpusAudio.from_probe(u2, executable='ffmpeg', **FFMPEG_OPTIONS)
       v.play(source)
       
+    if not info is None:
+      return {
+        'title': info['title'], 
+        'video_url': info['webpage_url'], 
+        'author': info['uploader'], 
+        'author_url': info['uploader_url'], 
+        'date': info['upload_date'], 
+        'time': info['duration']}
+      
   
 async def cmd_join(m):
   
@@ -385,16 +398,17 @@ async def cmd_exit(m, voices):
       
   await m.reply('Вышел.')
   
-async def cmd_play(m, voices):
+async def cmd_play(m, voices, emb):
   
   args = m.content.split(' ')
+  author = m.author.mention
   url = ''
   
   if args[1].startswith('https://www.youtube.com/watch'):
     url = args[1]
   else:
     for w in args[1:]:
-      url += f' {w}'
+      url += f'{w} '
   
   voiceChannel = None
     
@@ -411,11 +425,17 @@ async def cmd_play(m, voices):
     for voice in voices:
       if voice.channel in m.guild.voice_channels:
         await m.guild.get_member(voice.user.id).move_to(m.author.voice.channel)
-        await loadAndPlayMusic(voice, url)
+        videoTable = await loadAndPlayMusic(voice, url)
   else:
-    await loadAndPlayMusic(voiceChannel, url)
+    videoTable = await loadAndPlayMusic(voiceChannel, url)
     
-  await m.reply('Проигрывание начато!')
+  emb.add_field(name='Участник: ', value=author, inline=False)
+  emb.add_field(name='Канал: ', value='[{0}]({1})'.format(videoTable['author'], videoTable['author_url']), inline=False)
+  emb.add_field(name='Видео: ', value='[{0}]({1})'.format(videoTable['title'], videoTable['video_url']), inline=False)
+  emb.add_field(name='Длительность: ', value=videoTable['time'], inline=False)
+    
+  await m.channel.send(embed=emb)
+  await m.delete()
   
 async def cmd_pause(m, voices):
   
