@@ -1,4 +1,6 @@
 import discord
+from discord.ext import commands
+import asyncio
 import os
 
 import functions as fnc
@@ -47,6 +49,7 @@ async def on_message(msg):
   clearEmb = discord.Embed(title='Информация про чистку', color=0xFF5733)
   reportEmb = discord.Embed(title='Жалоба', color=0xFF5733)
   infoEmb = discord.Embed(title='Информация', color=0xFF5733)
+  musicEmb = discord.Embed(title='Информация про видео', color=0xFF5733)
     
   # Add commands here
   
@@ -67,7 +70,7 @@ async def on_message(msg):
   # Music commands
   await fnc.createCommand('>', 'Зайти в голосовой канал.', fnc.cmd_join, False, 'Проигрыватель', [msg])
   await fnc.createCommand('<', 'Выйти из голосового канала.', fnc.cmd_exit, False, 'Проигрыватель', [msg, client.voice_clients])
-  await fnc.createCommand('p', 'Начать проигрывание музыки.', fnc.cmd_play, False, 'Проигрыватель', [msg, client.voice_clients])
+  await fnc.createCommand('p', 'Начать проигрывание музыки.', fnc.cmd_play, False, 'Проигрыватель', [msg, client.voice_clients, musicEmb])
   await fnc.createCommand('s', 'Остановить проигрывание музыки.', fnc.cmd_pause, False, 'Проигрыватель', [msg, client.voice_clients])
   await fnc.createCommand('r', 'Возобновить проигрывание музыки.', fnc.cmd_resume, False, 'Проигрыватель', [msg, client.voice_clients])
   
@@ -125,9 +128,6 @@ async def on_message(msg):
     await fnc.savePickle(guild.id, 'membersStats', userInfo)
   
   # Not commands
-
-  if content == '':
-    return
   
   if messageIsPrivate:
     await fnc.addToLogFile('[PRIVATE] {0}: {1}'.format(user.name, content), 'PRIVATE_LOGS')
@@ -171,10 +171,10 @@ async def on_message(msg):
           await msg.reply('У вас нет доступа к этой команде!')
           return
       else:
-        try:
-          await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
-        except:
-          await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
+        #try:
+        await fnc.cmds[cmd][1](*fnc.cmds[cmd][4])
+        #except:
+          #await msg.reply('Аргументы команды введены неверно или кодер без мозга!')
         return
     
   await msg.reply('Такой команды не существует!')
