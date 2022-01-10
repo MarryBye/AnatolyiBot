@@ -6,8 +6,6 @@ import random
 import aiohttp
 import pickle
 import youtube_dl
-import requests
-from bs4 import BeautifulSoup
 
 from datetime import datetime
 
