@@ -104,7 +104,7 @@ async def loadAndPlayMusic(v, u):
       
 async def checkIsAdmin(ctx):
   
-  if ctx.guild.owner.id == ctx.guild.owner.id:
+  if ctx.guild.owner.id == ctx.author.id:
     return True
   
   if ctx.author.guild_permissions.administrator:
@@ -112,13 +112,10 @@ async def checkIsAdmin(ctx):
   
   adminRole = ctx.guild.get_role(await getSettingsForGuild(ctx.guild.id, 'adminRole'))
         
-  if adminRole is None:
-    return False
-        
-  if not adminRole in ctx.author.roles:
-    return False
+  if not adminRole is None and adminRole in ctx.author.roles:
+    return True
   
-  return True
+  return False
       
 async def setSettingsForGuild(guildID, arg, setting):
   
