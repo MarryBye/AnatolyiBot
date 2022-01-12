@@ -28,7 +28,7 @@ class admin_cmd(commands.Cog):
         kickEmb.add_field(name='Причина: ', value=' '.join(reason), inline=False)
         
         try:
-            await guild.kick(member, reason=reason)
+            await guild.kick(member, reason=' '.join(reason))
             await ctx.channel.send(embed=kickEmb)
             await addToLogFile(ctx.guild.id, f'[KICK] Участник {ctx.author.name}#{ctx.author.discriminator} кикнул {member.name}#{member.discriminator}. Причина: {" ".join(reason)}')
             await ctx.message.delete()
@@ -51,7 +51,7 @@ class admin_cmd(commands.Cog):
         banEmb.add_field(name='Причина: ', value=' '.join(reason), inline=False)
         
         try:
-            await guild.ban(member, reason=reason, delete_message_days=0)
+            await guild.ban(member, reason=' '.join(reason), delete_message_days=0)
             await ctx.channel.send(embed=banEmb)
             await addToLogFile(ctx.guild.id, f'[BAN] Участник {ctx.author.name}#{ctx.author.discriminator} забанил {member.name}#{member.discriminator}. Причина: {" ".join(reason)}')
             await ctx.message.delete()
@@ -109,8 +109,8 @@ class admin_cmd(commands.Cog):
     async def getSettings(self, ctx):
         
         if not (await checkIsAdmin(ctx)):
-            await ctx.message.add_reaction('\N{THUMBS DOWN SIGN}')
-            return
+          await ctx.message.add_reaction('\N{THUMBS DOWN SIGN}')
+          return
         
         newsRole = await getSettingsForGuild(ctx.guild.id, 'newsRole')
         adminRole = await getSettingsForGuild(ctx.guild.id, 'adminRole')
