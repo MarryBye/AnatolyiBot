@@ -101,16 +101,20 @@ class user_cmd(commands.Cog):
         topEmb = discord.Embed(title='Рейтинг самых активных', color=0xFF5733)
         oldTable = await getMembersStatsTable(guild.id)
         
-        sortedTopTable = sorted(oldTable.items(), key = lambda kv:(kv[1]['lvl'], kv[0]), reverse=True)
-        
+        sortedTopTable = sorted(oldTable.items(), key = lambda kv:(kv[1]['msg'], kv[0]), reverse=True)
+
         for k,v in sortedTopTable[0:10]:
-            memb = await guild.fetch_member(int(k))
+          try:
+            memb = guild.get_member(int(k))
+            print(memb.name)
             msg = v['msg']
             lvl = v['lvl']
             exp = v['exp']
             expToNextLvl = v['expToNextLvl']
             
             topEmb.add_field(name=f'{memb.name}#{memb.discriminator}', value=f'Сообщения: {msg}\nУровень: {lvl}\nОпыт: {exp} / {expToNextLvl}', inline=False)
+          except:
+            continue
             
         await ctx.channel.send(embed=topEmb)
         await ctx.message.delete()
