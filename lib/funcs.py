@@ -1,7 +1,7 @@
 import discord
 
 import os
-import pickle
+import json
 import youtube_dl
 import re
 
@@ -16,14 +16,13 @@ async def addToLogFile(guildID, text):
     os.mkdir('data/' + str(guildID))
   except:
     pass
-  with open('data/' + str(guildID) + '/chat_logs.txt', mode='a+', encoding='utf-8') as writer:
+  with open('data/' + str(guildID) + '/chat_logs.txt', mode='a+', encoding='utf-8') as fl:
     textToLog = '[{0}] {1}'.format(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"), text)
-    writer.seek(0)
-    data = writer.read()
+    fl.seek(0)
+    data = fl.read()
     if len(data) > 0:
-      writer.write('\n')
-    writer.write(textToLog)
-    print(textToLog)
+      fl.write('\n')
+    fl.write(textToLog)
     
 async def getStringArgs(txt, needNumbers = False):
 
@@ -46,14 +45,14 @@ async def getTimeBySeconds(secs):
   return timedelta(seconds=secs)
     
 async def savePickle(guildID, fname, arg):
-  fl = open('data/{0}/{1}.pkl'.format(guildID, fname), 'wb')
-  pickle.dump(arg, fl)
+  with open('data/{0}/{1}.json'.format(guildID, fname), 'w', encoding="UTF-8") as fl:
+    json.dump(arg, fl, ensure_ascii=False)
 
 async def loadPickle(guildID, fname):
-  fl = open('data/{0}/{1}.pkl'.format(guildID, fname), 'rb')
-  content = pickle.load(fl)
-  fl.close()
-  return content
+  with open('data/{0}/{1}.json'.format(guildID, fname), 'r', encoding="UTF-8") as fl:
+    content = json.load(fl)
+    fl.close()
+    return content
 
 async def repairFilesForGuild(guild):
   
@@ -68,10 +67,13 @@ async def repairFilesForGuild(guild):
   
   membersStartTable = {}
 
+  roles4ReactionsStartTable = {}
+
   try:
     os.mkdir('data/{0}'.format(guild.id))
     await savePickle(guild.id, 'guildSettings', settingsStartTable)
     await savePickle(guild.id, 'membersStats', membersStartTable)
+    await savePickle(guild.id, 'reactionMessagesWithRoles', roles4ReactionsStartTable)
     print('Восстановил файлы для сервера «{0}»'.format(guild.name))
   except:
     print('Файлы не нуждаются в восстановлении!')
